@@ -1,2 +1,2 @@
 # tower-defense-2d-pygame
-test
+requires pygame: pip install pygame
