@@ -1,4 +1,4 @@
-# BÁO CÁO ĐỒ ÁN GAME TOWER DEFENSE
+# BÁO CÁO ĐỒ ÁN GAME FANTASY TOWER DEFENSE 2D
 
 ## 1. Giới thiệu đồ án
 

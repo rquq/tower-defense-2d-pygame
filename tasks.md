@@ -1,4 +1,4 @@
-# Project Roadmap: Python Pixel Tower Defense
+# Project Roadmap: Fantasy Tower Defense 2D
 
 ## Phase 1: Foundation & Low-Res Rendering
 - [x] Initialize Pygame window (1920x1080).

@@ -20,7 +20,7 @@ class Engine:
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
         self.display_surface = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-        pygame.display.set_caption("Fantasy Defense 2D")
+        pygame.display.set_caption("Fantasy Tower Defense 2D")
         self.clock = pygame.time.Clock()
         
         AssetManager.get_instance().init()

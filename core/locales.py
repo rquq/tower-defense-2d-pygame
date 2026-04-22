@@ -2,7 +2,7 @@ LANGUAGES = ["EN", "VI"]
 
 TEXT = {
     "EN": {
-        "TITLE": "FANTASY DEFENSE 2D",
+        "TITLE": "FANTASY TOWER DEFENSE 2D",
         "PRESS_START": "PRESS ANY KEY TO START",
         "LANGUAGE": "LANGUAGE: ENGLISH (L)",
         "START_NOW": "START NOW",
@@ -54,7 +54,7 @@ TEXT = {
         "OFF": "OFF",
     },
     "VI": {
-        "TITLE": "THỦ THÀNH KỲ ẢO 2D",
+        "TITLE": "FANTASY TOWER DEFENSE 2D",
         "PRESS_START": "NHẤN PHÍM BẤT KỲ ĐỂ BẮT ĐẦU",
         "LANGUAGE": "NGÔN NGỮ: TIẾNG VIỆT (L)",
         "WAVE": "ĐỢT",
