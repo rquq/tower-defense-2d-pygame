@@ -49,8 +49,8 @@ def get_pixel_pos(col, row):
 
 # Scaling
 # Scaling
-BASE_ENEMY_HP = 12
-HP_SCALING = 1.12 # Increased difficulty scaling
+BASE_ENEMY_HP = 25
+HP_SCALING = 1.15 # Increased difficulty scaling
 ENEMY_SPEED_SCALING = 1.01
 ENEMY_SPAWN_INTERVAL = 900
 BLESSING_INTERVAL = 2
