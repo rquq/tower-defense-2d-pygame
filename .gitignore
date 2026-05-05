@@ -13,8 +13,8 @@ venv.bak/
 *.msi
 ~$*
 *.docx
-convert.py
-full_line.json
+# convert.py (đã cho phép push)
+# full_line.json (đã cho phép push)
 .pixi
 __pypackages__/
 *.log

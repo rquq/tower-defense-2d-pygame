@@ -1,96 +1,58 @@
 import pygame
-from core.constants import *
+from core.constants import C
 from systems.asset_manager import AssetManager
 
 class Beacon:
-    """
-    Support structure placed on the grid.
-    Emits beneficial stat buffs to adjacent towers.
-    """
+    """Công trình hỗ trợ đặc biệt có khả năng lan tỏa hào quang để tăng sức mạnh cho tháp lân cận."""
+
     def __init__(self, x, y, beacon_type):
-        """
-        Initializes the Beacon at a grid coordinate with specific stats.
-        
-        Args:
-            x (int): X pixel coordinate.
-            y (int): Y pixel coordinate.
-            beacon_type (str): The type of the beacon determining its stats.
-        """
-        stats = BEACON_STATS[beacon_type]
+        """Khởi tạo công trình hỗ trợ tại vị trí xác định."""
+        stats = C.BEACON_STATS[beacon_type]
         self.x = x
         self.y = y
         self.type = beacon_type
-        self.buff_type = stats["buff_type"]
-        self.buff_val = stats["buff_val"]
-        self.color = stats["color"]
-        self.desc = stats["desc"]
-        self.gems = [] # Slots for STAT_CARDs
-        
+        self.buff_type = stats['buff_type']
+        self.buff_val = stats['buff_val']
+        self.color = stats['color']
+        self.desc = stats['desc']
+        self.gems = []
+
     def add_gem(self, item):
-        """
-        Attempts to insert a Stat Card into the beacon's upgrade slots.
-        
-        Args:
-            item (InventoryItem): The upgrade card to slot.
-            
-        Returns:
-            bool: True if slotting succeeded, False if full.
-        """
-        if len(self.gems) < 2 and item.item_type == ItemType.STAT_CARD:
+        """Gắn thêm thẻ chỉ số vào công trình hỗ trợ để mở rộng khả năng của nó."""
+        if len(self.gems) < 2 and item.item_type == C.ItemType.STAT_CARD:
             self.gems.append(item)
             return True
         return False
 
     def get_all_buffs(self):
-        """
-        Calculates the aggregate buffs provided by the beacon and slotted cards.
-        
-        Returns:
-            dict: Key-value map of stat types and additive buff percentages.
-        """
-        # Base buff from beacon type
+        """Tổng hợp toàn bộ các loại hiệu ứng tăng cường mà công trình này đang cung cấp."""
         buffs = {self.buff_type: self.buff_val}
-        # Add card buffs (Balanced values: +15% for primary, +10% for crit)
         for card in self.gems:
             name = card.name
-            if name == "STRENGTH CARD": buffs["ATK"] = buffs.get("ATK", 0) + 0.15
-            elif name == "AGILITY CARD": buffs["SPD"] = buffs.get("SPD", 0) + 0.15
-            elif name == "VISION CARD": buffs["RNG"] = buffs.get("RNG", 0) + 0.15
-            elif name == "PRECISION CARD": buffs["CRIT"] = buffs.get("CRIT", 0) + 0.10
+            if name == 'STRENGTH CARD':
+                buffs['ATK'] = buffs.get('ATK', 0) + 0.15
+            elif name == 'AGILITY CARD':
+                buffs['SPD'] = buffs.get('SPD', 0) + 0.15
+            elif name == 'VISION CARD':
+                buffs['RNG'] = buffs.get('RNG', 0) + 0.15
+            elif name == 'PRECISION CARD':
+                buffs['CRIT'] = buffs.get('CRIT', 0) + 0.1
         return buffs
 
     def draw(self, surface):
-        """
-        Renders the diamond beacon graphic and its active modification sockets.
-        
-        Args:
-            surface (pygame.Surface): The rendering destination.
-        """
-        x, y = int(self.x), int(self.y)
-        points = [
-            (x, y - 20), # Top
-            (x + 20, y), # Right
-            (x, y + 20), # Bottom
-            (x - 20, y)  # Left
-        ]
-        
-        # Base shadow
-        pygame.draw.polygon(surface, (20, 20, 25), [(p[0]+4, p[1]+4) for p in points])
-        
-        # Main body
+        """Vẽ công trình hỗ trợ và vùng hào quang ảnh hưởng của nó."""
+        x, y = (int(self.x), int(self.y))
+        points = [(x, y - 20), (x + 20, y), (x, y + 20), (x - 20, y)]
+        pygame.draw.polygon(surface, (20, 20, 25), [(p[0] + 4, p[1] + 4) for p in points])
         pygame.draw.polygon(surface, self.color, points)
-        pygame.draw.polygon(surface, (255, 255, 255), points, 2) # Border
-        
-        # Core pulse (visual only)
+        pygame.draw.polygon(surface, (255, 255, 255), points, 2)
         import math
         pulse = (math.sin(pygame.time.get_ticks() * 0.005) + 1) * 5
         pygame.draw.circle(surface, (255, 255, 255, 150), (x, y), int(5 + pulse), 1)
-        
-        # Card Slots as visual indicators
         for i in range(2):
             if i < len(self.gems):
                 slot_color = self.gems[i].color
-                sx = x - 8 + (i * 16)
-                sy = y + 25 # Below the diamond
+                sx = x - 8 + i * 16
+                sy = y + 25
                 pygame.draw.circle(surface, slot_color, (sx, sy), 4)
                 pygame.draw.circle(surface, (255, 255, 255), (sx, sy), 4, 1)
