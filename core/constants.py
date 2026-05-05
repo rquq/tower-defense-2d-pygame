@@ -44,6 +44,9 @@ COLOR_INVALID = (255, 50, 50, 150)
 BASE_HEALTH = 1
 
 def get_pixel_pos(col, row):
+    """
+    Docstring for def get_pixel_pos.
+    """
     return (col * GRID_SIZE + OFFSET_X + GRID_SIZE // 2, 
             row * GRID_SIZE + OFFSET_Y + GRID_SIZE // 2)
 
@@ -65,21 +68,27 @@ TOWER_STATS = {
 }
 
 ENEMY_TYPES = {
-    "Slime": {"hp": 1.0, "speed": 4.0, "color": (50, 200, 50), "gold": 12, "min_wave": 1},
-    "Wolf": {"hp": 0.6, "speed": 6.5, "color": (120, 120, 130), "gold": 18, "min_wave": 3},
-    "Golem": {"hp": 3.0, "speed": 2.2, "color": (100, 150, 90), "gold": 35, "min_wave": 5, "def": 2},
-    "Orc": {"hp": 0.3, "speed": 8.0, "color": (50, 150, 50), "gold": 10, "min_wave": 7},
-    "Monster": {"hp": 6.5, "speed": 3.5, "color": (200, 50, 200), "gold": 80, "min_wave": 10, "def": 3},
-    "Dragon": {"hp": 1.2, "speed": 8.5, "color": (250, 50, 50), "gold": 60, "min_wave": 12, "def": 0}
+    "Slime": {"hp": 1.0, "speed": 3.0, "color": (50, 200, 50), "gold": 12, "min_wave": 1},
+    "Wolf": {"hp": 0.6, "speed": 4.5, "color": (120, 120, 130), "gold": 18, "min_wave": 3},
+    "Golem": {"hp": 3.0, "speed": 1.5, "color": (100, 150, 90), "gold": 35, "min_wave": 5, "def": 2},
+    "Orc": {"hp": 0.3, "speed": 5.5, "color": (50, 150, 50), "gold": 10, "min_wave": 7},
+    "Monster": {"hp": 6.5, "speed": 2.5, "color": (200, 50, 200), "gold": 80, "min_wave": 10, "def": 3},
+    "Dragon": {"hp": 1.2, "speed": 6.0, "color": (250, 50, 50), "gold": 60, "min_wave": 12, "def": 0}
 }
 
 class GameState(Enum):
+    """
+    Docstring for class GameState.
+    """
     MENU = auto()
     PLAYING = auto()
     POWERUP = auto()
     GAME_OVER = auto()
 
 class ItemType(Enum):
+    """
+    Docstring for class ItemType.
+    """
     GEM = auto()
     BEACON = auto()
     STAT_CARD = auto()

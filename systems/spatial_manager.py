@@ -7,10 +7,16 @@ class SpatialManager:
     Reduces O(N) searches to approximately O(1) by partitioning space into cells.
     """
     def __init__(self, cell_size=GRID_SIZE * 2):
+        """
+        Docstring for def __init__.
+        """
         self.cell_size = cell_size
         self.grid = {}
 
     def _get_cell(self, x, y):
+        """
+        Docstring for def _get_cell.
+        """
         return (int(x // self.cell_size), int(y // self.cell_size))
 
     def clear(self):

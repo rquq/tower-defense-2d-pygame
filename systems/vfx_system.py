@@ -3,10 +3,19 @@ import random
 import math
 
 class Particle:
+    """
+    Docstring for class Particle.
+    """
     def __init__(self, x, y, color, velocity, life, size=4, gravity=0, is_rect=False):
+        """
+        Docstring for def __init__.
+        """
         self.reset(x, y, color, velocity, life, size, gravity, is_rect)
 
     def reset(self, x, y, color, velocity, life, size=4, gravity=0, is_rect=False):
+        """
+        Docstring for def reset.
+        """
         self.x = x
         self.y = y
         self.color = color
@@ -19,6 +28,9 @@ class Particle:
         self.is_dead = False
 
     def update(self):
+        """
+        Docstring for def update.
+        """
         self.x += self.vx
         self.y += self.vy
         self.vy += self.gravity
@@ -27,6 +39,9 @@ class Particle:
             self.is_dead = True
 
     def draw(self, surface):
+        """
+        Docstring for def draw.
+        """
         if self.life <= 0: return
         current_size = max(1, int(self.size * (self.life / self.max_life)))
         
@@ -42,10 +57,19 @@ class Particle:
             pygame.draw.rect(surface, self.color, rect)
 
 class FloatingText:
+    """
+    Docstring for class FloatingText.
+    """
     def __init__(self, x, y, text, color, life=60, is_crit=False):
+        """
+        Docstring for def __init__.
+        """
         self.reset(x, y, text, color, life, is_crit)
 
     def reset(self, x, y, text, color, life=60, is_crit=False):
+        """
+        Docstring for def reset.
+        """
         self.x, self.y = x, y
         self.text = text
         self.color = color
@@ -56,12 +80,18 @@ class FloatingText:
         self.surf = None # Cached surface
 
     def update(self):
+        """
+        Docstring for def update.
+        """
         # Crits float up slower but stay longer
         self.y -= 0.5 if self.is_crit else 0.8
         self.life -= 1
         if self.life <= 0: self.is_dead = True
 
     def draw(self, surface, font):
+        """
+        Docstring for def draw.
+        """
         if self.life <= 0: return
         if not self.surf:
             self.surf = font.render(self.text, True, self.color)
@@ -69,6 +99,9 @@ class FloatingText:
         alpha = int((self.life / self.max_life) * 255)
         
         def blit_alpha(surf, pos, alpha):
+            """
+            Docstring for def blit_alpha.
+            """
             s = surf.copy()
             s.set_alpha(alpha)
             surface.blit(s, pos)
@@ -96,7 +129,13 @@ class FloatingText:
         blit_alpha(draw_surf, (sx, sy), alpha)
 
 class VFXManager:
+    """
+    Docstring for class VFXManager.
+    """
     def __init__(self):
+        """
+        Docstring for def __init__.
+        """
         self.particles = []
         self.texts = []
         # Object Pools
@@ -105,6 +144,9 @@ class VFXManager:
         self.shake_val = 0
 
     def _get_particle(self, x, y, color, velocity, life, size=4, gravity=0, is_rect=False):
+        """
+        Docstring for def _get_particle.
+        """
         if self.particle_pool:
             p = self.particle_pool.pop()
             p.reset(x, y, color, velocity, life, size, gravity, is_rect)
@@ -112,6 +154,9 @@ class VFXManager:
         return Particle(x, y, color, velocity, life, size, gravity, is_rect)
 
     def _get_text(self, x, y, text, color, is_crit=False):
+        """
+        Docstring for def _get_text.
+        """
         if self.text_pool:
             t = self.text_pool.pop()
             t.reset(x, y, text, color, is_crit=is_crit)
@@ -119,9 +164,15 @@ class VFXManager:
         return FloatingText(x, y, text, color, is_crit=is_crit)
 
     def create_floating_text(self, x, y, text, color, is_crit=False):
+        """
+        Docstring for def create_floating_text.
+        """
         self.texts.append(self._get_text(x, y, text, color, is_crit))
 
     def create_ambient_particle(self, x, y, color, size=3):
+        """
+        Docstring for def create_ambient_particle.
+        """
         # Slow moving upward particle for ambient links
         vx = random.uniform(-0.3, 0.3)
         vy = random.uniform(-0.5, -0.2)
@@ -129,6 +180,9 @@ class VFXManager:
         self.particles.append(self._get_particle(x, y, color, (vx, vy), life, size=size))
 
     def spawn_link_particle(self, start_x, start_y, end_x, end_y, color):
+        """
+        Docstring for def spawn_link_particle.
+        """
         # Wider source spread that converges at the turret's heart
         # Random starting point within the beacon's volume
         sx = start_x + random.uniform(-15, 15)
@@ -147,9 +201,15 @@ class VFXManager:
             # Link particles are directional rectangles for "pop"
             self.particles.append(self._get_particle(sx, sy, color, (vx, vy), life, size=8, is_rect=True))
     def trigger_shake(self, val):
+        """
+        Docstring for def trigger_shake.
+        """
         self.shake_val = max(self.shake_val, val)
 
     def create_explosion(self, x, y, color, count=15, size=5):
+        """
+        Docstring for def create_explosion.
+        """
         for _ in range(count):
             angle = random.uniform(0, math.pi * 2)
             speed = random.uniform(1, 4)
@@ -159,18 +219,27 @@ class VFXManager:
             self.particles.append(self._get_particle(x, y, color, (vx, vy), life, size=size))
 
     def create_impact(self, x, y, color):
+        """
+        Docstring for def create_impact.
+        """
         for _ in range(8):
             vx = random.uniform(-2, 2)
             vy = random.uniform(-2, 2)
             self.particles.append(self._get_particle(x, y, color, (vx, vy), 15, size=3))
 
     def create_death_effect(self, x, y, color):
+        """
+        Docstring for def create_death_effect.
+        """
         for _ in range(20):
             vx = random.uniform(-2, 2)
             vy = random.uniform(-4, 0)
             self.particles.append(self._get_particle(x, y, color, (vx, vy), 40, size=8, gravity=0.15))
 
     def update(self):
+        """
+        Docstring for def update.
+        """
         # Update and pool dead particles
         for p in self.particles[:]:
             p.update()
@@ -188,6 +257,9 @@ class VFXManager:
         if self.shake_val > 0: self.shake_val -= 1
 
     def draw(self, surface, font=None):
+        """
+        Docstring for def draw.
+        """
         for p in self.particles:
             p.draw(surface)
         if font:

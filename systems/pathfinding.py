@@ -32,11 +32,20 @@ def get_path_bfs(start_grid, end_grid, walkable_grid):
     return path[::-1]
 
 class PathSystem:
+    """
+    Docstring for class PathSystem.
+    """
     def __init__(self):
+        """
+        Docstring for def __init__.
+        """
         self.walkable_tiles = set()
         self.generate_curvy_path()
         
     def generate_curvy_path(self):
+        """
+        Docstring for def generate_curvy_path.
+        """
         # Single curvy path, compressed for 28x14 grid
         self.add_segment((0, 4), (4, 4))
         self.add_segment((4, 4), (4, 11))
@@ -51,6 +60,9 @@ class PathSystem:
         self.add_segment((25, 9), (27, 9))
         
     def add_segment(self, start, end):
+        """
+        Docstring for def add_segment.
+        """
         c1, r1 = start
         c2, r2 = end
         if c1 == c2:
@@ -59,6 +71,9 @@ class PathSystem:
             for c in range(min(c1, c2), max(c1, c2) + 1): self.walkable_tiles.add((c, r1))
 
     def get_enemy_waypoints(self):
+        """
+        Docstring for def get_enemy_waypoints.
+        """
         # Using simple BFS for pathfinding
         grid_path = get_path_bfs((0, 4), (27, 9), self.walkable_tiles)
         return [get_pixel_pos(c, r) for c, r in grid_path]

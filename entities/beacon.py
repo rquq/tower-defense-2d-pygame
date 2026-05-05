@@ -3,7 +3,19 @@ from core.constants import *
 from systems.asset_manager import AssetManager
 
 class Beacon:
+    """
+    Support structure placed on the grid.
+    Emits beneficial stat buffs to adjacent towers.
+    """
     def __init__(self, x, y, beacon_type):
+        """
+        Initializes the Beacon at a grid coordinate with specific stats.
+        
+        Args:
+            x (int): X pixel coordinate.
+            y (int): Y pixel coordinate.
+            beacon_type (str): The type of the beacon determining its stats.
+        """
         stats = BEACON_STATS[beacon_type]
         self.x = x
         self.y = y
@@ -15,12 +27,27 @@ class Beacon:
         self.gems = [] # Slots for STAT_CARDs
         
     def add_gem(self, item):
+        """
+        Attempts to insert a Stat Card into the beacon's upgrade slots.
+        
+        Args:
+            item (InventoryItem): The upgrade card to slot.
+            
+        Returns:
+            bool: True if slotting succeeded, False if full.
+        """
         if len(self.gems) < 2 and item.item_type == ItemType.STAT_CARD:
             self.gems.append(item)
             return True
         return False
 
     def get_all_buffs(self):
+        """
+        Calculates the aggregate buffs provided by the beacon and slotted cards.
+        
+        Returns:
+            dict: Key-value map of stat types and additive buff percentages.
+        """
         # Base buff from beacon type
         buffs = {self.buff_type: self.buff_val}
         # Add card buffs (Balanced values: +15% for primary, +10% for crit)
@@ -33,7 +60,12 @@ class Beacon:
         return buffs
 
     def draw(self, surface):
-        # Draw a diamond-shaped dummy beacon
+        """
+        Renders the diamond beacon graphic and its active modification sockets.
+        
+        Args:
+            surface (pygame.Surface): The rendering destination.
+        """
         x, y = int(self.x), int(self.y)
         points = [
             (x, y - 20), # Top

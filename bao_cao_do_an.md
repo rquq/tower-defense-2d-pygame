@@ -49,6 +49,17 @@ Nhiệm vụ của người chơi là xây dựng các trụ phòng thủ Tower 
 4. Giải thuật Deterministic Slotting:
    - Mục đích: Trái tim của chế độ Auto, tự động tính toán, phân tích lưới và quyết định việc xây tháp, nâng cấp trang bị.
    - Ý nghĩa: Tính toán độ bao phủ coverage và tiềm năng nhận buff của từng ô trống. Thuật toán ưu tiên đặt Beacon tại các giao điểm có thể ảnh hưởng đến nhiều tháp nhất và tự động cắm các tháp gây sát thương vào những điểm nóng giao tranh.
+3. Object Pooling (Hàng đợi tái sử dụng đối tượng):
+   - Mục đích: Áp dụng trong `VFXManager` cho cả `Particle` và `FloatingText`.
+   - Ý nghĩa: Thay vì liên tục tạo và hủy hàng trăm thực thể hiệu ứng gây giật khung hình do thu gom rác (Garbage Collection), hệ thống đưa các đối tượng hết hạn vào pool để tái chế.
+
+**CÁC CHỈNH SỬA VÀ TỐI ƯU NÂNG CAO TRONG TUẦN 2:**
+
+1. Tinh chỉnh thuật toán Spatial Partitioning:
+   - Chỉnh sửa: Bổ sung các bộ lọc chiến thuật (Targeting Modes: First, Closest, Strongest) kết hợp cùng truy vấn không gian cục bộ.
+
+2. Cải tiến thuật toán tìm đường BFS:
+   - Chỉnh sửa: Đóng gói logic di chuyển dựa trên mảng Waypoints sinh ra từ BFS, giảm tải cho CPU khi quái vật di chuyển liên tục.
 
 ---
 
@@ -63,6 +74,7 @@ Nhiệm vụ của người chơi là xây dựng các trụ phòng thủ Tower 
 - Hệ thống Combat: Cài đặt logic dò tìm mục tiêu cho Tower. Quét bán kính xung quanh, chọn quái vật gần nhất tiến tới đích, xoay nòng và bắn đạn.
 
 ### b. Tuần 2: Nâng cao, Tối ưu hóa và Hoàn thiện UI/UX
+- Nâng cấp Đồ họa Pixel Art thực thụ: Chuyển đổi từ việc vẽ đồ họa bằng code sang tích hợp hệ thống `AssetManager` nạp trực tiếp các texture Pixel Art chất lượng cao từ thư mục `assets/textures`. Hệ thống tự động xử lý độ trong suốt (alpha masking) và tối ưu hóa bounding box linh hoạt.
 - Đồ họa và UI/UX: Tái cấu trúc toàn bộ đồ họa sang phong cách Fantasy với caro xanh lá đặc trưng. Hoàn thiện các thành phần UI với nút bấm phong cách đá/gỗ cứng cáp, tăng kích thước phông chữ dễ đọc, hệ thống Tooltip cập nhật thời gian thực các chỉ số DPS, Damage, Range.
 - Tối ưu hóa sâu: Tích hợp thành công kiến trúc SpatialManager xử lý va chạm và tìm kiếm mục tiêu. Xóa bỏ các vấn đề rớt FPS ở cuối game.
 - Chiều sâu chiến thuật: Lập trình Scrollable Inventory. Ra mắt Beacon và Hệ thống trang bị Gem cho phép gắn ngọc vào tháp trực tiếp bằng cách kéo thả.
@@ -101,132 +113,165 @@ Phần này mô tả kịch bản trình bày các tính năng thực tế trong
 
 ---
 
-## 6. Phụ lục 2: Docstring mẫu
+## 6. Phụ lục 2: Danh sách Docstrings Toàn diện của Hệ thống
 
-Dưới đây là các docstring tiêu biểu được sử dụng rộng rãi trong mã nguồn của game theo chuẩn Google Docstring, giúp các lập trình viên khác dễ dàng đọc hiểu và duy trì cấu trúc API nội bộ của engine.
+Dưới đây là tập hợp đầy đủ docstrings của các thành phần cốt lõi trong engine game theo chuẩn Google Docstring.
 
-### a. Hệ thống tối ưu không gian Spatial Manager
-
+### a. Hệ thống Tối ưu Không gian (SpatialManager)
 ```python
 class SpatialManager:
     """
     Quản lý việc phân vùng không gian để tối ưu hóa kiểm tra va chạm Spatial Hashing.
     Thay vì duyệt số mũ bậc 2 giữa đạn và quái vật, SpatialManager chia màn hình thành một 
-    lưới các cells lớn. Mỗi entity sẽ tự động được đăng ký vào cell 
-    tương ứng với tọa độ hiện tại của nó.
+    lưới các cells lớn. Mỗi entity sẽ tự động được đăng ký vào cell tương ứng.
     
     Attributes:
-        cell_size (int): Kích thước pixel của mỗi cell trên lưới phân vùng.
-        grid (dict): Hash map với key là tuple tọa độ cell_x, cell_y
-                        và value là danh sách các entity nằm trong cell đó.
+        cell_size (int): Kích thước pixel của mỗi cell.
+        grid (dict): Hash map lưu trữ danh sách entities theo cell.
     """
-
-    def get_nearby_entities(self, pos: tuple, radius: float) -> list:
+    def get_nearby_entities(self, x: float, y: float, radius: float) -> list:
         """
-        Truy xuất nhanh danh sách các entities đang nằm trong vùng lân cận của một điểm,
-        bằng cách chỉ duyệt qua cell chứa điểm đó và 8 cell xung quanh nó.
+        Truy xuất nhanh danh sách các entities nằm trong vùng lân cận.
         
         Args:
-            pos (tuple): Tọa độ trung tâm x, y để bắt đầu tìm kiếm.
-            radius (float): Bán kính quét xung quanh tâm tính bằng pixel.
+            x (float): Tọa độ X trung tâm.
+            y (float): Tọa độ Y trung tâm.
+            radius (float): Bán kính quét.
             
         Returns:
-            list: Danh sách tham chiếu đến các entities thỏa mãn điều kiện 
-                  khoảng cách nhỏ hơn hoặc bằng radius so với tâm pos.
+            list: Danh sách các entities trong tầm quét.
+        """
+        pass
+
+    def get_closest_entity(self, x: float, y: float, radius: float, criteria=None) -> object:
+        """
+        Tìm thực thể gần nhất trong bán kính cho trước.
         """
         pass
 ```
 
-### b. Thực thể Tháp phòng thủ Tower
-
+### b. Hệ thống Tìm đường (Pathfinding)
 ```python
-class Tower(pygame.sprite.Sprite):
+def get_path_bfs(start_grid: tuple, end_grid: tuple, walkable_grid: set) -> list:
     """
-    Lớp đại diện cho một công trình phòng thủ Tower trên bản đồ.
-    Tháp có thể được trang bị Gem, có thể nhận Buff từ các công trình
-    lân cận Beacon và tự động khai hỏa vào mục tiêu theo logic Targeting.
+    Thuật toán tìm đường Breadth-First Search (BFS) trên lưới không trọng số.
     
-    Attributes:
-        pos (tuple): Tọa độ điểm trung tâm của tháp trên lưới.
-        base_stats (dict): Từ điển chứa các chỉ số gốc damage, fire_rate, range.
-        current_stats (dict): Chỉ số thực tế sau khi tính toán các loại Buff và Gem.
-        target (Enemy): Tham chiếu đến đối tượng kẻ địch đang bị tháp khóa mục tiêu.
-        equipped_gems (list): Danh sách các đối tượng Gem đang gắn trên tháp này.
+    Args:
+        start_grid (tuple): Tọa độ ô bắt đầu (col, row).
+        end_grid (tuple): Tọa độ ô đích (col, row).
+        walkable_grid (set): Tập hợp ô có thể di chuyển.
+        
+    Returns:
+        list: Danh sách các ô tạo thành đường đi ngắn nhất.
     """
-
-    def apply_buff(self, buff_type: str, value: float, duration: float = -1) -> None:
-        """
-        Áp dụng hiệu ứng cường hóa Buff lên tháp làm thay đổi current_stats.
-        
-        Args:
-            buff_type (str): Tên loại chỉ số được tăng cường, ví dụ fire_rate, damage.
-            value (float): Giá trị hoặc tỷ lệ phần trăm được cộng thêm.
-            duration (float): Thời gian tồn tại của buff tính bằng giây. 
-                                 Nếu là -1, buff này có tác dụng vĩnh viễn.
-        """
-        pass
-
-    def find_target(self, spatial_manager: 'SpatialManager') -> None:
-        """
-        Quét và thiết lập mục tiêu hiện tại cho tháp. Thuật toán sẽ dùng 
-        spatial_manager để lấy danh sách quái trong tầm, sau đó tìm kẻ địch 
-        tiến gần nhà chính Base nhất dựa trên path progress.
-        
-        Args:
-            spatial_manager (SpatialManager): Dịch vụ không gian dùng để truy vấn 
-                                                 kẻ địch trong tầm bắn nhanh chóng.
-        """
-        pass
+    pass
 ```
 
-### c. Hệ thống quản lý Đợt tấn công Wave Manager
-
+### c. Thực thể Tháp phòng thủ (Tower)
 ```python
-class WaveManager:
+class Tower:
     """
-    Hệ thống điều phối nhịp độ game, kiểm soát sự xuất hiện của kẻ địch theo các
-    đợt tấn công Wave. Có khả năng Scaling bằng cách trộn các
-    chủng loại quái vật và điều chỉnh chỉ số theo cấp độ.
-    
-    Attributes:
-        current_wave (int): Số thứ tự đợt tấn công hiện hành.
-        is_spawning (bool): Cờ đánh dấu hệ thống đang trong giai đoạn nhả quái hay không.
-        enemy_queue (list): Hàng đợi Queue các loại quái vật sắp được spawn.
+    Đại diện cho công trình phòng thủ. Tự động bắn kẻ địch và nhận các nâng cấp.
     """
-
-    def start_next_wave(self) -> None:
+    def recalculate(self, adjacency_buffs: list) -> None:
         """
-        Khởi động đợt tấn công tiếp theo. Tính toán số lượng quái vật, lượng HP 
-        cơ bản được gia tăng theo công thức hàm mũ, và nạp chúng vào enemy_queue.
+        Tính toán lại toàn bộ chỉ số sau khi nhận Buff từ Beacon hoặc Gem.
+        """
+        pass
+
+    def find_target(self, spatial_manager: SpatialManager) -> object:
+        """
+        Tìm kiếm mục tiêu tối ưu dựa trên Targeting Mode đã thiết lập.
         """
         pass
 ```
 
-### d. Quản lý Hiệu ứng hình ảnh VFX Manager
+### d. Thực thể Kẻ địch (Enemy)
+```python
+class Enemy:
+    """
+    Đại diện cho quái vật tấn công căn cứ.
+    """
+    def take_damage(self, amount: float, fire_mod: bool = False, ice_mod: bool = False) -> None:
+        """
+        Trừ máu kẻ địch và kích hoạt các hiệu ứng trạng thái (đốt, làm chậm).
+        """
+        pass
+```
 
+### e. Quản lý Tài nguyên (AssetManager)
+```python
+class AssetManager:
+    """
+    Singleton quản lý nạp và lưu trữ Assets (hình ảnh, âm thanh) từ thư mục `assets/`.
+    """
+    def _extract_sprites(self, path: str, expected_count: int) -> list:
+        """
+        Cắt sprite sheet và khử màu nền trắng không mong muốn.
+        """
+        pass
+```
+
+### f. Quản lý Hiệu ứng (VFXManager)
 ```python
 class VFXManager:
     """
-    Trung tâm điều khiển tất cả các hiệu ứng hình ảnh phụ trợ không ảnh hưởng đến
-    logic game chính nhằm tăng trải nghiệm người dùng.
-    Mọi hiệu ứng từ cháy nổ, hạt, đến Floating Text đều được cập nhật
-    đồng loạt qua class này.
-    
-    Attributes:
-        particles (list): Danh sách các đối tượng Particle đang hoạt động.
-        floating_texts (list): Danh sách các Damage Text đang nổi lên.
+    Xử lý hạt nổ Particle và chữ nổi FloatingText sử dụng Object Pooling.
     """
-
-    def create_explosion(self, pos: tuple, color: tuple, count: int = 10) -> None:
+    def create_explosion(self, x: float, y: float, color: tuple, count: int = 15) -> None:
         """
-        Khởi tạo một hiệu ứng nổ tại một tọa độ chỉ định bằng cách sinh ra hàng loạt 
-        các Particle bay theo các hướng ngẫu nhiên với vận tốc giảm dần.
-        
-        Args:
-            pos (tuple): Tọa độ tâm vụ nổ.
-            color (tuple): Mã màu RGB của các mảnh vỡ.
-            count (int): Số lượng mảnh hạt được sinh ra. Số lượng lớn sẽ gây hiệu ứng
-                            ấn tượng hơn nhưng cần chú ý hiệu năng.
+        Tạo hiệu ứng nổ tung tóe các hạt.
+        """
+        pass
+```
+### g. Quản lý Đợt quái (WaveManager)
+```python
+class WaveManager:
+    """
+    Quản lý luồng spawn quái vật, cấp phát phần thưởng và theo dõi trạng thái wave.
+    """
+    def spawn_enemy(self, waypoint_list: list) -> None:
+        """
+        Sinh ra kẻ địch tại điểm bắt đầu dựa trên chỉ số nâng cấp theo wave.
+        """
+        pass
+```
+
+### h. Công trình hỗ trợ (Beacon)
+```python
+class Beacon:
+    """
+    Tạo hiệu ứng hào quang (aura) tăng cường chỉ số cho các tháp phòng thủ lân cận.
+    """
+    def get_all_buffs(self) -> dict:
+        """
+        Tổng hợp tất cả buff hiện có từ beacon cơ bản và các thẻ nâng cấp đính kèm.
+        """
+        pass
+```
+
+### i. Đạn bắn (Projectile)
+```python
+class Projectile:
+    """
+    Thực thể đạn di chuyển bám đuổi theo kẻ địch.
+    """
+    def hit(self, spatial_manager: SpatialManager, vfx_manager: VFXManager) -> None:
+        """
+        Xử lý va chạm, trừ máu kẻ địch và kích nổ hiệu ứng diện rộng.
+        """
+        pass
+```
+
+### j. Quản lý Inventory (InventoryItem)
+```python
+class InventoryItem:
+    """
+    Mô tả thuộc tính và tác dụng của các trang bị trong hòm đồ.
+    """
+    def get_tooltip_data(self, t: callable) -> list:
+        """
+        Trích xuất văn bản hiển thị thông tin chi tiết của vật phẩm.
         """
         pass
 ```

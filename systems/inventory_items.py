@@ -1,7 +1,18 @@
 from core.constants import ItemType, BEACON_STATS
 
 class InventoryItem:
+    """
+    Represents an item stored in the player's inventory.
+    Can be a Gem, Beacon, or Stat Card.
+    """
     def __init__(self, item_type, data):
+        """
+        Initializes the InventoryItem with its type and data.
+        
+        Args:
+            item_type (ItemType): The category of the item.
+            data (dict or str): Specific statistics or identifier for the item.
+        """
         self.item_type = item_type # ItemType enum
         self.data = data # Dictionary or String depending on type
         self.name = ""
@@ -32,6 +43,15 @@ class InventoryItem:
             self.description = [self.name, data["desc"], "Fits Powerup Slot"]
 
     def get_tooltip_data(self, t):
+        """
+        Generates formatted tooltip lines for UI display.
+        
+        Args:
+            t (function): Translation function for localizing strings.
+            
+        Returns:
+            list: List of string lines to show in the tooltip.
+        """
         lines = [f"--- {t(self.name).upper()} ---"]
         
         if self.item_type == ItemType.BEACON:

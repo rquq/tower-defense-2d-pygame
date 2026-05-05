@@ -15,7 +15,13 @@ from systems.spatial_manager import SpatialManager
 from core.locales import TEXT, LANGUAGES
 
 class Engine:
+    """
+    Docstring for class Engine.
+    """
     def __init__(self, is_dev=False):
+        """
+        Docstring for def __init__.
+        """
         self.lang_idx = 0
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         pygame.init()
@@ -70,24 +76,32 @@ class Engine:
         self.render_static_background()
 
     def t(self, key):
+        """
+        Docstring for def t.
+        """
         return TEXT[LANGUAGES[self.lang_idx]].get(key, key)
 
     def generate_trees(self):
+        """
+        Docstring for def generate_trees.
+        """
         self.trees = []
         # Dense "Single Circle" scatter with 10% grid overlap for seamless blending
-        for _ in range(700):
-            side = random.choice(["L", "R", "T"])
+        for _ in range(1200):
+            side = random.choices(["L", "R", "T"], weights=[1, 1, 4])[0]
             size = random.randint(70, 130)
             rad = size // 2
-            overlap = int(rad * 0.1) # 10% overlap into the grid
             if side == "L": 
-                x, y = random.randint(-rad, OFFSET_X - rad + overlap), random.randint(-rad, WIN_HEIGHT + rad)
+                x, y = random.randint(-rad, OFFSET_X), random.randint(-rad, WIN_HEIGHT + rad)
             elif side == "R": 
-                x, y = random.randint(WIN_WIDTH - OFFSET_X + rad - overlap, WIN_WIDTH + rad), random.randint(-rad, WIN_HEIGHT + rad)
+                x, y = random.randint(WIN_WIDTH - OFFSET_X, WIN_WIDTH + rad), random.randint(-rad, WIN_HEIGHT + rad)
             else: 
-                x, y = random.randint(-rad, WIN_WIDTH + rad), random.randint(-rad, UI_HUD_HEIGHT - rad + overlap)
+                x, y = random.randint(-rad, WIN_WIDTH + rad), random.randint(-rad, OFFSET_Y)
             self.trees.append(self._create_tree_data(x, y, size))
     def _create_tree_data(self, bx, by, size):
+        """
+        Docstring for def _create_tree_data.
+        """
         r = random.Random(bx * 7 + by * 13)
         # Middle-ground vibrant forest greens
         color = (r.randint(35, 65), r.randint(110, 155), r.randint(35, 65))
@@ -98,6 +112,9 @@ class Engine:
         }
 
     def render_static_background(self):
+        """
+        Docstring for def render_static_background.
+        """
         ctx = self.background_surface
         # 1. Perfectly Aligned Checkered Background
         # Extend the grid range to cover the whole screen relative to the play grid's origin
@@ -117,7 +134,7 @@ class Engine:
                 if rnd.random() < 0.3:
                     for _ in range(rnd.randint(1, 3)):
                         nx, ny = gx + rnd.randint(5, GRID_SIZE-5), gy + rnd.randint(5, GRID_SIZE-5)
-                        pygame.draw.line(ctx, (60, 120, 40), (nx, ny), (nx, ny-rnd.randint(2, 5)), 1)
+                        pygame.draw.line(ctx, (60, 120, 40), (nx, ny), (nx, ny-rnd.randint(4, 8)), 2)
 
         # 2. Path and Grid Details (Restricted to play area)
         for c in range(GRID_COLS):
@@ -136,40 +153,46 @@ class Engine:
                 else:
                     # Real Grass Blades & Big Tufts (already checkered by step 1)
                     rnd = random.Random(c * 777 + r * 333)
-                    for _ in range(rnd.randint(12, 18)):
+                    for _ in range(rnd.randint(8, 14)):
                         nx, ny = gx + rnd.randint(3, GRID_SIZE-3), gy + rnd.randint(5, GRID_SIZE-3)
-                        h = rnd.randint(4, 9)
+                        h = rnd.randint(8, 16)
                         grass_color = (rnd.randint(60, 100), rnd.randint(160, 210), rnd.randint(50, 80))
                         shadow_color = (max(0, grass_color[0]-40), max(0, grass_color[1]-40), max(0, grass_color[2]-40))
-                        pygame.draw.line(ctx, shadow_color, (nx+1, ny), (nx+1, ny-h+1), 1)
-                        pygame.draw.line(ctx, grass_color, (nx, ny), (nx + rnd.randint(-1, 1), ny-h), 1)
-                        if h > 6: pygame.draw.circle(ctx, (min(255, grass_color[0]+30), min(255, grass_color[1]+30), min(255, grass_color[2]+30)), (nx, ny-h), 1)
+                        pygame.draw.line(ctx, shadow_color, (nx+1, ny), (nx+1, ny-h+1), 2)
+                        pygame.draw.line(ctx, grass_color, (nx, ny), (nx + rnd.randint(-1, 1), ny-h), 2)
+                        if h > 10: pygame.draw.circle(ctx, (min(255, grass_color[0]+30), min(255, grass_color[1]+30), min(255, grass_color[2]+30)), (nx, ny-h), 2)
 
                     # --- Big Grass Tufts (3-leaf shaped) ---
                     for _ in range(rnd.randint(2, 4)):
                         nx, ny = gx + rnd.randint(5, GRID_SIZE-5), gy + rnd.randint(5, GRID_SIZE-5)
-                        h = rnd.randint(8, 12); grass_color = (rnd.randint(40, 80), rnd.randint(140, 190), rnd.randint(40, 70))
+                        h = rnd.randint(14, 22); grass_color = (rnd.randint(40, 80), rnd.randint(140, 190), rnd.randint(40, 70))
                         shadow_color = (max(0, grass_color[0]-30), max(0, grass_color[1]-30), max(0, grass_color[2]-30))
                         for ang in [-0.4, 0, 0.4]:
                             tx, ty = nx + math.sin(ang) * h, ny - math.cos(ang) * h
-                            pygame.draw.line(ctx, shadow_color, (nx+1, ny), (tx+1, ty+1), 2)
-                            pygame.draw.line(ctx, grass_color, (nx, ny), (tx, ty), 2)
+                            pygame.draw.line(ctx, shadow_color, (nx+1, ny), (tx+1, ty+1), 3)
+                            pygame.draw.line(ctx, grass_color, (nx, ny), (tx, ty), 3)
 
                     # --- Small Field Flowers ---
-                    if rnd.random() < 0.15:
+                    if rnd.random() < 0.25:
                         for _ in range(rnd.randint(1, 2)):
                             fx, fy = gx + rnd.randint(10, GRID_SIZE-10), gy + rnd.randint(10, GRID_SIZE-10)
                             f_color = rnd.choice([(220, 80, 80), (80, 150, 220), (180, 80, 220), (255, 230, 100)])
-                            pygame.draw.line(ctx, (40, 100, 30), (fx, fy), (fx, fy-3), 1)
-                            pygame.draw.circle(ctx, f_color, (fx, fy-3), 2); pygame.draw.circle(ctx, (255, 255, 255), (fx, fy-3), 1)
+                            pygame.draw.line(ctx, (40, 100, 30), (fx, fy), (fx, fy-6), 2)
+                            pygame.draw.circle(ctx, f_color, (fx, fy-6), 5)
+                            pygame.draw.circle(ctx, (255, 255, 255), (fx, fy-6), 2)
 
         # 2. Border Lines for Grid (Subtle)
         for c in range(GRID_COLS + 1):
             pygame.draw.line(ctx, (70, 140, 40), (OFFSET_X + c * GRID_SIZE, OFFSET_Y), (OFFSET_X + c * GRID_SIZE, OFFSET_Y + GRID_ROWS * GRID_SIZE), 1)
         for r in range(GRID_ROWS + 1):
             pygame.draw.line(ctx, (70, 140, 40), (OFFSET_X, OFFSET_Y + r * GRID_SIZE), (OFFSET_X + GRID_COLS * GRID_SIZE, OFFSET_Y + r * GRID_SIZE), 1)
+            
+        self.draw_surrounding_forests(ctx)
 
     def handle_events(self):
+        """
+        Docstring for def handle_events.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT: self.running = False
             if event.type == pygame.KEYDOWN:
@@ -197,6 +220,9 @@ class Engine:
                 elif event.button == 5: self.inv_scroll = min(max(0, len(self.wave_manager.inventory)-8), self.inv_scroll + 1)
 
     def handle_click(self):
+        """
+        Docstring for def handle_click.
+        """
         mx, my = pygame.mouse.get_pos(); panel_y = WIN_HEIGHT - UI_BOTTOM_HEIGHT
         if self.state == GameState.MENU:
             lw = self.fonts["small"].size(self.t("LANGUAGE"))[0] + 40
@@ -232,7 +258,7 @@ class Engine:
             for i in range(min(16, len(self.wave_manager.inventory))):
                 item_idx = i + self.inv_scroll
                 if item_idx >= len(self.wave_manager.inventory): break
-                if 810 + i*45 <= mx <= 810 + i*45 + 40 and panel_y + 80 <= my <= panel_y + 120:
+                if 810 + i*65 <= mx <= 810 + i*65 + 60 and panel_y + 80 <= my <= panel_y + 140:
                     AssetManager.get_instance().play_sound("ui_click")
                     self.selected_inv_idx = item_idx; self.trash_mode = False; return
 
@@ -283,6 +309,9 @@ class Engine:
                         self.needs_stat_recalc = True
 
     def is_valid_placement(self, gx, gy, px, py):
+        """
+        Docstring for def is_valid_placement.
+        """
         if not (0 <= gx < GRID_COLS and 0 <= gy < GRID_ROWS) or (gx, gy) in self.path_system.walkable_tiles: return False
         for t in self.towers:
             if math.hypot(t.x - px, t.y - py) < GRID_SIZE: return False
@@ -291,6 +320,9 @@ class Engine:
         return True
 
     def calculate_adjacency_buffs(self):
+        """
+        Docstring for def calculate_adjacency_buffs.
+        """
         beacon_map = {( (int(b.x) - OFFSET_X) // GRID_SIZE, (int(b.y) - OFFSET_Y) // GRID_SIZE ): b for b in self.beacons}
         for t in self.towers:
             tgx, tgy = (int(t.x) - OFFSET_X) // GRID_SIZE, (int(t.y) - OFFSET_Y) // GRID_SIZE
@@ -305,12 +337,18 @@ class Engine:
             t.recalculate(buff_list)
 
     def force_start_wave(self):
+        """
+        Docstring for def force_start_wave.
+        """
         if not self.wave_manager.is_wave_active and self.state == GameState.PLAYING:
             AssetManager.get_instance().play_sound("wave_start")
             self.wave_manager.start_wave(self.path_system.get_enemy_waypoints())
             self.next_wave_timer = int(20 * FPS * self.wave_manager.wave_interval_multiplier)
 
     def update(self):
+        """
+        Docstring for def update.
+        """
         if self.state == GameState.PLAYING:
             self.vfx_manager.update(); self.wave_manager.update()
             self.spatial_manager.clear()
@@ -325,20 +363,23 @@ class Engine:
                     if abs(tgx - bgx) + abs(tgy - bgy) == 1 and random.random() < 0.15:
                         self.vfx_manager.spawn_link_particle(b.x, b.y, t.x, t.y, b.color)
             if self.auto_slot_mode: self.process_auto_slots()
-            if not self.wave_manager.is_wave_active:
+            if self.wave_manager.health <= 0:
+                if self.state != GameState.GAME_OVER: AssetManager.get_instance().play_sound("game_over")
+                self.state = GameState.GAME_OVER
+            elif not self.wave_manager.is_wave_active:
                 if self.wave_manager.wave_number % BLESSING_INTERVAL == 0 and not self.powerups_offered:
                     self.state = GameState.POWERUP; self.trigger_powerup(); return
                 self.next_wave_timer -= 1
                 if self.next_wave_timer <= 0: self.force_start_wave()
             else: self.powerups_offered = False; self.next_wave_timer = (2 if self.is_dev else 30) * FPS
-            if self.wave_manager.health <= 0:
-                if self.state != GameState.GAME_OVER: AssetManager.get_instance().play_sound("game_over")
-                self.state = GameState.GAME_OVER
         elif self.state == GameState.POWERUP:
             self.powerup_timer -= 1
             if self.powerup_timer <= 0: self.state = GameState.PLAYING
 
     def draw(self):
+        """
+        Docstring for def draw.
+        """
         temp_surface = pygame.Surface((WIN_WIDTH, WIN_HEIGHT))
         old_surface, self.display_surface = self.display_surface, temp_surface
         if self.state == GameState.MENU: self.draw_menu()
@@ -354,6 +395,9 @@ class Engine:
         pygame.display.flip()
 
     def apply_blur(self, surface, amount=3, passes=2):
+        """
+        Docstring for def apply_blur.
+        """
         w, h = surface.get_size(); blurred = surface
         for _ in range(passes):
             small = pygame.transform.smoothscale(blurred, (w // amount, h // amount))
@@ -361,10 +405,16 @@ class Engine:
         return blurred
 
     def draw_text_with_shadow(self, text, font, color, pos, shadow_color=(0, 0, 0, 180), offset=(2, 2)):
+        """
+        Docstring for def draw_text_with_shadow.
+        """
         self.display_surface.blit(font.render(text, True, shadow_color), (pos[0] + offset[0], pos[1] + offset[1]))
         self.display_surface.blit(font.render(text, True, color), pos)
 
     def draw_wrapped_text_centered(self, text, font, color, center_x, start_y, max_width):
+        """
+        Docstring for def draw_wrapped_text_centered.
+        """
         words = text.split(' '); lines = []; current_line = ""
         for word in words:
             test_line = current_line + word + " "
@@ -379,8 +429,10 @@ class Engine:
             self.draw_text_with_shadow(line, font, color, (center_x - tw // 2, start_y + i * line_height))
 
     def draw_menu(self):
+        """
+        Docstring for def draw_menu.
+        """
         ctx = self.display_surface; ctx.blit(self.background_surface, (0, 0))
-        self.draw_surrounding_forests(ctx)
         ctx.blit(self.apply_blur(ctx, 4, 3), (0, 0))
         s = pygame.Surface((WIN_WIDTH, WIN_HEIGHT), pygame.SRCALPHA); s.fill((0, 0, 0, 160)); ctx.blit(s, (0, 0))
         title = self.t("TITLE"); font_l = self.fonts["large"]
@@ -395,9 +447,11 @@ class Engine:
         self.draw_text_with_shadow(lang, font_s, COLOR_UI_TEXT, (lx + 20, ly + 5))
 
     def draw_playing(self):
+        """
+        Docstring for def draw_playing.
+        """
         ctx = self.display_surface; ctx.blit(self.background_surface, (0, 0))
         t = pygame.time.get_ticks() / 1000
-        self.draw_surrounding_forests(ctx)
         self.draw_monster_cave(*get_pixel_pos(0, 4), t)
         self.draw_castle_base(get_pixel_pos(27, 9), t)
         shadow_surf = pygame.Surface((WIN_WIDTH, WIN_HEIGHT), pygame.SRCALPHA)
@@ -415,6 +469,9 @@ class Engine:
         if self.state == GameState.PLAYING: self.draw_placement_preview()
 
     def draw_placement_preview(self):
+        """
+        Docstring for def draw_placement_preview.
+        """
         mx, my = pygame.mouse.get_pos(); gx, gy = (mx-OFFSET_X)//GRID_SIZE, (my-OFFSET_Y)//GRID_SIZE
         if not (0 <= gx < GRID_COLS and 0 <= gy < GRID_ROWS): return
         px, py = gx*GRID_SIZE+OFFSET_X+GRID_SIZE//2, gy*GRID_SIZE+OFFSET_Y+GRID_SIZE//2
@@ -436,6 +493,9 @@ class Engine:
             pygame.draw.circle(ctx, (255,255,255,40), (px, py), TOWER_STATS[self.selected_type]['range'], 1)
 
     def draw_ui(self):
+        """
+        Docstring for def draw_ui.
+        """
         ctx = self.display_surface; hud_gray = (50, 50, 60)
         self.draw_hud_module(30, 8, 160, f"{self.t('WAVE')}: {self.wave_manager.wave_number}", hud_gray)
         if self.wave_manager.is_wave_active: 
@@ -491,20 +551,55 @@ class Engine:
         for i in range(16):
             idx = i + self.inv_scroll
             if idx >= len(self.wave_manager.inventory): break
-            item = self.wave_manager.inventory[idx]; gx, gy = 810+i*45, sy+55
-            hover = gx <= mx <= gx+40 and gy <= my <= gy+40; sel = (idx == self.selected_inv_idx)
-            pygame.draw.rect(ctx, (120, 160, 120) if sel else (100, 140, 100) if hover else (80, 120, 80), (gx, gy, 40, 40), border_radius=5)
-            pygame.draw.rect(ctx, (255, 215, 0) if sel else (50, 90, 50), (gx, gy, 40, 40), 3 if sel else 2, border_radius=5)
-            ix, iy = gx+20, gy+20
+            item = self.wave_manager.inventory[idx]; gx, gy = 810+i*65, sy+55
+            hover = gx <= mx <= gx+60 and gy <= my <= gy+60; sel = (idx == self.selected_inv_idx)
+            pygame.draw.rect(ctx, (120, 160, 120) if sel else (100, 140, 100) if hover else (80, 120, 80), (gx, gy, 60, 60), border_radius=5)
+            pygame.draw.rect(ctx, (255, 215, 0) if sel else (50, 90, 50), (gx, gy, 60, 60), 3 if sel else 2, border_radius=5)
+            ix, iy = gx+30, gy+30
+            from systems.asset_manager import AssetManager
+            mgr = AssetManager.get_instance()
+            
             if item.item_type == ItemType.GEM:
-                pts = [(ix, iy-8), (ix+8, iy), (ix, iy+8), (ix-8, iy)]; pygame.draw.polygon(ctx, item.color, pts); pygame.draw.polygon(ctx, (255,255,255), pts, 1)
-            elif item.item_type == ItemType.BEACON: pygame.draw.circle(ctx, item.color, (ix, iy), 8, 2); pygame.draw.circle(ctx, (255,255,255), (ix, iy), 2)
-            elif item.item_type == ItemType.STAT_CARD: pygame.draw.rect(ctx, item.color, (ix-6, iy-8, 12, 16), 1)
+                key = f"GEM_{item.data}"
+                if key in mgr.icons:
+                    gem_asset = mgr.icons[key]
+                    tw, th = gem_asset.get_size()
+                    target_h = 52
+                    target_w = int((tw / th) * target_h)
+                    scaled_gem = pygame.transform.scale(gem_asset, (target_w, target_h))
+                    ctx.blit(scaled_gem, (ix - target_w // 2, iy - target_h // 2))
+                else:
+                    pts = [(ix, iy-12), (ix+12, iy), (ix, iy+12), (ix-12, iy)]
+                    pygame.draw.polygon(ctx, item.color, pts)
+                    pygame.draw.polygon(ctx, (255,255,255), pts, 1)
+            elif item.item_type == ItemType.BEACON: 
+                pygame.draw.circle(ctx, item.color, (ix, iy), 12, 3)
+                pygame.draw.circle(ctx, (255,255,255), (ix, iy), 4)
+            elif item.item_type == ItemType.STAT_CARD: 
+                key = "CARD_STRENGTH"
+                if "STRENGTH" in item.name: key = "CARD_STRENGTH"
+                elif "AGILITY" in item.name: key = "CARD_AGILITY"
+                elif "VISION" in item.name: key = "CARD_VISION"
+                elif "PRECISION" in item.name: key = "CARD_PRECISION"
+                
+                if key in mgr.icons:
+                    book_asset = mgr.icons[key]
+                    tw, th = book_asset.get_size()
+                    target_h = 52
+                    target_w = int((tw / th) * target_h)
+                    scaled_book = pygame.transform.scale(book_asset, (target_w, target_h))
+                    ctx.blit(scaled_book, (ix - target_w // 2, iy - target_h // 2))
+                    ctx.blit(scaled_book, (ix - target_w // 2, iy - target_h // 2))
+                else:
+                    pygame.draw.rect(ctx, item.color, (ix-6, iy-8, 12, 16), 1)
         
         if len(self.wave_manager.inventory) > 16: self.draw_text_with_shadow("< SCROLL >", self.fonts["tiny"], (120, 110, 100), (WIN_WIDTH - 200, sy+110), shadow_color=(210, 200, 180))
         self.draw_text_with_shadow(f"FPS: {int(self.clock.get_fps())}", self.fonts["mono"], (255, 255, 255), (WIN_WIDTH - 120, WIN_HEIGHT - 40))
 
     def draw_hud_module(self, x, y, w, text, bg, tc=(255, 240, 200)):
+        """
+        Docstring for def draw_hud_module.
+        """
         ctx = self.display_surface; font = self.fonts["mono"]; txt = font.render(text, True, tc); aw = max(w, txt.get_width()+25); h = 36
         pygame.draw.rect(ctx, (40, 80, 50), (x, y, aw, h), border_radius=6); pygame.draw.rect(ctx, (20, 50, 30), (x, y, aw, h), 2, border_radius=6)
         for rx, ry in [(x+6, y+6), (x+aw-6, y+6), (x+6, y+h-6), (x+aw-6, y+h-6)]:
@@ -512,6 +607,9 @@ class Engine:
         self.draw_text_with_shadow(text, font, tc, (x+(aw-txt.get_width())//2, y+(h-txt.get_height())//2), shadow_color=(0,0,0,120))
 
     def draw_tooltips(self):
+        """
+        Docstring for def draw_tooltips.
+        """
         mx, my = pygame.mouse.get_pos(); py = WIN_HEIGHT - UI_BOTTOM_HEIGHT
         for i, (name, s) in enumerate(TOWER_STATS.items()):
             bx = 180 + i*115
@@ -538,6 +636,9 @@ class Engine:
                 self.render_tooltip(mx+15, my-220, lines); return
 
     def render_tooltip(self, x, y, lines):
+        """
+        Docstring for def render_tooltip.
+        """
         font = self.fonts["tiny"]; final_lines = []
         for rl in lines:
             txt = str(rl).upper(); words = txt.split(' '); curr = ""
@@ -554,11 +655,45 @@ class Engine:
         for i, l in enumerate(final_lines): self.draw_text_with_shadow(l, font, (60, 40, 20), (x+15, y+8 + i*22), shadow_color=(185, 200, 175))
 
     def draw_surrounding_forests(self, ctx):
+        """
+        Docstring for def draw_surrounding_forests.
+        """
+        from systems.asset_manager import AssetManager
+        grid_rect = pygame.Rect(OFFSET_X, OFFSET_Y, GRID_COLS * GRID_SIZE, GRID_ROWS * GRID_SIZE)
         for tree in sorted(self.trees, key=lambda t: t["pos"][1]):
             px, py = tree["pos"]; sz = tree["size"]; color = tree["color"]
-            pygame.draw.circle(ctx, color, (px, py), sz // 2)
+            
+            env_assets = AssetManager.get_instance().env
+            tree_asset = None
+            if sz > 110 and "medium_tree" in env_assets:
+                tree_asset = env_assets["medium_tree"]
+            elif sz > 85 and "small_tree" in env_assets:
+                tree_asset = env_assets["small_tree"]
+            elif "small_small_tree" in env_assets:
+                tree_asset = env_assets["small_small_tree"]
+                
+            if tree_asset:
+                tw, th = tree_asset.get_size()
+                target_w = sz
+                if tree_asset == env_assets.get("small_tree") or tree_asset == env_assets.get("small_small_tree"):
+                    target_w = int(sz * 1.5)
+                target_h = int((th / tw) * target_w)
+                scaled_tree = pygame.transform.scale(tree_asset, (target_w, target_h))
+                tree_rect = pygame.Rect(px - target_w//2, py + sz//2 - target_h, target_w, target_h)
+                
+                is_on_left = tree_rect.right <= OFFSET_X + 50
+                is_on_right = tree_rect.left >= OFFSET_X + GRID_COLS * GRID_SIZE - 50
+                is_on_top = tree_rect.bottom <= OFFSET_Y + 25
+                
+                if is_on_left or is_on_right or is_on_top:
+                    ctx.blit(scaled_tree, tree_rect.topleft)
+            else:
+                pygame.draw.circle(ctx, color, (px, py), sz // 2)
 
     def draw_monster_cave(self, cx, cy, t):
+        """
+        Docstring for def draw_monster_cave.
+        """
         ctx = self.display_surface; asset = AssetManager.get_instance().env.get("Cave")
         if asset: ctx.blit(pygame.transform.scale(asset, (GRID_SIZE, GRID_SIZE)), (cx-GRID_SIZE//2, cy-GRID_SIZE//2)); return
         pygame.draw.rect(ctx, (20, 40, 25), (cx-GRID_SIZE//2+2, cy-GRID_SIZE//2+2, GRID_SIZE-4, GRID_SIZE-4), border_radius=8)
@@ -567,6 +702,9 @@ class Engine:
         for ex in [-10, 10]: pygame.draw.circle(ctx, eye_c, (cx+ex, cy-4), 4)
 
     def draw_castle_base(self, pos, t):
+        """
+        Docstring for def draw_castle_base.
+        """
         hx, hy, ctx = pos[0], pos[1], self.display_surface; asset = AssetManager.get_instance().env.get("Castle")
         if asset: ctx.blit(pygame.transform.scale(asset, (GRID_SIZE, GRID_SIZE)), (hx-GRID_SIZE//2, hy-GRID_SIZE//2)); return
         pygame.draw.rect(ctx, (210, 220, 210), (hx-25, hy-10, 50, 35)); pygame.draw.rect(ctx, (160, 170, 160), (hx-25, hy-10, 50, 35), 2)
@@ -574,6 +712,9 @@ class Engine:
         pygame.draw.rect(ctx, (40, 70, 50), (hx-8, hy+12, 16, 15), border_radius=3)
 
     def draw_powerup_menu(self):
+        """
+        Docstring for def draw_powerup_menu.
+        """
         ctx = self.display_surface; s = pygame.Surface((WIN_WIDTH, WIN_HEIGHT), pygame.SRCALPHA); s.fill((0,0,0,210)); ctx.blit(s, (0,0))
         title = self.t("POWERUP_MENU"); tx = WIN_WIDTH//2 - self.fonts["medium"].size(title)[0]//2; self.draw_text_with_shadow(title, self.fonts["medium"], (255, 215, 0), (tx, 180))
         timer = f"{self.t('TIME_REMAINING')}: {max(0, self.powerup_timer // FPS)}s"; tsx = WIN_WIDTH//2 - self.fonts["small"].size(timer)[0]//2; self.draw_text_with_shadow(timer, self.fonts["small"], (255, 100, 100), (tsx, 235))
@@ -587,11 +728,17 @@ class Engine:
             sc = f"{self.t('PRESS')} [{i+1}]"; self.draw_text_with_shadow(sc, self.fonts["small"], COLOR_ACCENT, (cx+140-self.fonts["small"].size(sc)[0]//2, 600))
 
     def draw_game_over(self):
+        """
+        Docstring for def draw_game_over.
+        """
         ctx = self.display_surface; s = pygame.Surface((WIN_WIDTH, WIN_HEIGHT), pygame.SRCALPHA); s.fill((60,0,0,225)); ctx.blit(s, (0,0))
         txt = self.fonts["large"].render(self.t("MISSION FAILED"), True, (255,100,100)); ctx.blit(txt, (WIN_WIDTH//2-txt.get_width()//2, WIN_HEIGHT//2-50))
         st = self.t("PRESS ANY KEY TO RESTART"); self.draw_text_with_shadow(st, self.fonts["medium"], (255, 255, 255), (WIN_WIDTH//2-self.fonts["medium"].size(st)[0]//2, WIN_HEIGHT//2+100))
 
     def trigger_powerup(self):
+        """
+        Docstring for def trigger_powerup.
+        """
         self.powerups_offered = True; self.powerup_timer = (2 if self.is_dev else 15) * FPS
         pool = [
             {"name": "ATTACK BEACON", "type": "BEACON", "data": "ATTACK BEACON", "desc": "BOOSTS ADJACENT DMG BY 25%"},
@@ -613,6 +760,9 @@ class Engine:
         self.current_powerups = selected
 
     def apply_powerup(self, idx):
+        """
+        Docstring for def apply_powerup.
+        """
         if idx >= len(self.current_powerups): return
         p = self.current_powerups[idx]
         if p["type"] == "GLOBAL":
@@ -623,12 +773,18 @@ class Engine:
         self.state = GameState.PLAYING
 
     def reset_game(self):
+        """
+        Docstring for def reset_game.
+        """
         self.wave_manager = WaveManager(self.vfx_manager)
         if self.is_dev: self.wave_manager.gold = 999999
         self.towers, self.beacons, self.selected_type, self.state = [], [], "Earth Cannon", GameState.PLAYING
         self.next_wave_timer = (2 if self.is_dev else 30) * FPS; self.current_powerups, self.powerups_offered, self.selected_inv_idx, self.inv_scroll, self.trash_mode, self.needs_stat_recalc = [], False, -1, 0, False, True
 
     def process_auto_slots(self):
+        """
+        Docstring for def process_auto_slots.
+        """
         self.auto_slot_timer += 1
         if self.auto_slot_timer < 30: return 
         self.auto_slot_timer = 0
@@ -648,6 +804,9 @@ class Engine:
             if slotted: break
 
     def run(self):
+        """
+        Docstring for def run.
+        """
         while self.running:
             self.handle_events(); self.update(); self.draw()
             self.clock.tick(FPS)
